@@ -1,6 +1,6 @@
 ---
 layout: lesson
-root: .
+root: ../
 title: Joins and aliases
 minutes: 30
 ---

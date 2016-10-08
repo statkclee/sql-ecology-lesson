@@ -1,6 +1,6 @@
 ---
 layout: lesson
-root: .
+root: ../
 title: Databases using SQL
 minutes: 60
 ---
