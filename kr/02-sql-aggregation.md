@@ -1,102 +1,97 @@
 ---
 layout: lesson
 root: ../
-title: Aggregation
+title: SQL 집계(Aggregation)
 minutes: 30
 ---
 
-## COUNT and GROUP BY
+## 갯수 세기와 GROUP BY
 
-Aggregation allows us to combine results by grouping records based on value and
-calculating combined values in groups.
+집계 기능을 통해 특정값 기준으로 레코드를 군집으로 묶거나 군집에 포함된 조합된 값을 계산할 수 있다.
 
-Let’s go to the surveys table and find out how many individuals there are.
-Using the wildcard simply counts the number of records (rows)
+`surveys` 테이블로 가서 얼마나 많은 개체가 존재하는지 파악하자.
+단순히 와일드카드를 사용하게 되면 레코드(행) 갯수를 셀 수 있다.
 
     SELECT COUNT(*)
     FROM surveys;
 
-We can also find out how much all of those individuals weigh.
+또한, 개체전체에 대한 전체 무게도 알아낼 수 있다.
 
     SELECT COUNT(*), SUM(weight)
     FROM surveys;
 
-We can output this value in kilograms, rounded to 3 decimal
-places:
+단위를 킬로그램으로 소수점 아래 3자리에서 반올림해서 출력값을 조정할 수도 있다:
 
     SELECT ROUND(SUM(weight)/1000.0, 3)
     FROM surveys;
 
-There are many other aggregate functions included in SQL including
-`MAX`, `MIN`, and `AVG`.
+SQL 기본 구문에 포함된 다른 집계내는 함수에는 `MAX`, `MIN`, `AVG` 도 포함된다.
 
-> ### Challenge
+> ### 도전과제
 >
-> Write a query that returns: total weight, average weight, and the min and max weights for all animals caught over the duration of the survey. Can you modify it so that it outputs these values only for weights between 5 and 10?
+> 조사기간에 걸쳐 생포된 모든 동물에 대한 전체 무게, 평균 체중, 최대 체중, 최소 체중을 계산하는 질의문을 작성하시오.
+> 작성된 질의문을 변경해서 체중이 5에서 10사이 체중에 대한 값만 뽑아내도록 작성하시오.
 
-
-Now, let's see how many individuals were counted in each species. We do this
-using a `GROUP BY` clause
+이제, 각 종족별로 얼마나 많은 개체가 포함되어 있는지 살펴보자. 
+이런 유형의 작업에 필요한 것이 `GROUP BY` 절이다.
 
     SELECT species_id, COUNT(*)
     FROM surveys
     GROUP BY species_id;
 
-`GROUP BY` tells SQL what field or fields we want to use to aggregate the data.
-If we want to group by multiple fields, we give `GROUP BY` a comma separated list.
+`GROUP BY` 절은 SQL에 어떤 필드 혹은 여러 필드를 기준으로 데이터 집계를 계산할지 지정한다.
+다수 필드로 집단을 묶고자 할 경우, `GROUP BY` 절에 콤마 구분자로 필드명을 구분한다.
 
-> ### Challenge
+> ### 도전과제
 >
-> Write queries that return:
+> 다음 결과를 출력하는 질의문을 작성하시오:
 >
-> 1. How many individuals were counted in each year.
-a) in total;
-b) per each species.
-> 2. Average weight of each species in each year.
-Can you modify the above queries combining them into one?
+> 1. 매년 얼마나 많은 개체가 집계되는가?
+a) 전체;
+b) 각 종족별로.
+> 2. 매년 각 종족별 평균 체중을 집계하시오.
+1번 질의문을 변경하여 2번 질의문과 결합하여 질의문을 하나로 작성할 수 있는가?
 
-## The `HAVING` keyword
+## `HAVING` 예약어
 
-In the previous lesson, we have seen the keywords `WHERE`, allowing to
-filter the results according to some criteria. SQL offers a mechanism to
-filter the results based on aggregate functions, through the `HAVING` keyword.
+앞선 수업에서, 예약어 `WHERE`를 살펴봤다. 특정 기준에 근거해서 결과값을 필터링한다.
+SQL은 집계합수 함수에서 나온 결과를 `HAVING` 예약어를 통해 필터링하는 메커니즘도 제공한다. 
 
-For example, we can adapt the last request we wrote to only return information
-about species with a count higher than 10:
+예를 들어, 개체수가 10 보다 큰 값을 갖는 종에 대한 정보만 추출하도록 마지막 작성한 질의문을 맞춰 작성할 수도 있다:
 
     SELECT species_id, COUNT(surveys.species_id)
     FROM surveys
     GROUP BY species_id
     HAVING COUNT(surveys.species_id) > 10;
 
-The `HAVING` keyword works exactly like the `WHERE` keyword, but uses
-aggregate functions instead of database fields.
+`HAVING` 키워드는 `WHERE` 키워드처럼 정확하게 동일하게 동작하지만,
+데이터베이스 필드명 대신에 집계함수를 사용한다.
 
-If you use `AS` in your query to rename a column, `HAVING` can use this
-information to make the query more readable. For example, in the above
-query, we can call the `COUNT(surveys.species_id)` by another name, like
-`occurrences`. This can be written this way:
+질의문에 `AS`를 사용해서 칼럼명을 변경하면, `HAVING` 절은 이 정보를 사용해서 
+질의문에 가독성을 높인다. 
+예를 들어, 앞선 질의문에 `COUNT(surveys.species_id)`  표현식에 `occurrences` 같은 명칭을 부여할 수 있다.
+이를 반영한 질의문은 다음과 같다:
+
 
     SELECT species_id, COUNT(surveys.species_id) AS occurrences
     FROM surveys
     GROUP BY species_id
     HAVING occurrences > 10;
 
-Note that in both queries, `HAVING` comes *after* `GROUP BY`. One way to
-think about this is: the data are retrieved (`SELECT`), can be filtered
-(`WHERE`), then joined in groups (`GROUP BY`); finally, we only select some
-of these groups (`HAVING`).
+두가지 질의문에서 주목할 점은 `HAVING` 절이 `GROUP BY` *다음에* 온다는 점이다.
+이를 생각하는 방식은 다음과 같다:
+데이터를 불러오면(`SELECT`), 필터링 되고(`WHERE`), 그리고 나서 집단으로 병합된다(`GROUP BY`);
+마지막으로, 집단으로 묶인 것중 일부만 선택한다(`HAVING`).
 
-> ### Challenge
+> ### 도전과제
 >
-> Write a query that returns, from the `species` table, the number of
-`genus` in each `taxa`, only for the `taxa` with more than 10 `genus`.
+> `species` 테이블에서 `taxa` 각각에 포함된 `genus` 갯수를 뽑아내는데, 
+`genus` 가 10 보다 큰 값을 갖는 `taxa`에 대해서만 추출하는 질의문을 작성한다.
 
-## Ordering aggregated results.
+## 집계된 결과 정렬
 
-We can order the results of our aggregation by a specific column, including
-the aggregated column.  Let’s count the number of individuals of each
-species captured, ordered by the count
+집계결과가 담긴 열이 포함해서, 특정 열을 기준으로 결과를 정렬할 수도 있다.
+생포된 종족별로 개체수를 세어 보는데, 개체수를 기준으로 정렬한다.
 
     SELECT species_id, COUNT(*)
     FROM surveys
@@ -104,48 +99,46 @@ species captured, ordered by the count
     ORDER BY COUNT(species_id);
 
 
-## Saving queries for future use
+## 질의문을 저장해서 재사용
 
-It is not uncommon to repeat the same operation more than once, for example
-for monitoring or reporting purposes. SQL comes with a very powerful mechanism
-to do this: views. Views are a form of query that is saved in the database,
-and can be used to look at, filter, and even update information. One way to
-think of views is as a table, that can read, aggregate, and filter information
-from several places before showing it to you.
+한번이상 동일한 연산작업을 반복하는 것이 일반적이다. 예를 들어, 모니터링 혹은 보고서 작성 목적이 여기에 포함된다.
+SQL에는 이런 작업을 수행하는 매우 강력한 매커니즘이 제공된다: **뷰(View)**.
+뷰는 질의문의 한가지 형태로 데이터베이스에 저장되어, 정보를 조회, 필터링, 갱신도 가능케 한다.
+뷰를 생각하는 한가지 방식은 테이블로 볼 수 있는데, 최종 질의 결과를 산출하기 전에 
+여기저기 흩어진 테이블에서 정보를 읽어 들이고, 집계하고, 필터링한다. 
 
-Creating a view from a query requires to add `CREATE VIEW viewname AS`
-before the query itself. For example, imagine that my project only covers
-the data gathered during the summer (May - September) of 2000.  That 
-query would look like: 
+질의문에서 뷰를 생성하는 하려면 `CREATE VIEW viewname AS`를 질의문 바로 앞에 추가한다.
+예를 들어, 개인 프로젝트로 2000 년 5월에서 9월까지 수집된 데이터만 관계된다고 가정하자.
+개인 프로젝트로 필요한 데이터를 추출하는 질의문은 다음과 같다:
 
     SELECT *
     FROM surveys
     WHERE year = 2000 AND (month > 4 AND month < 10)
 
-But we don't want to have to type that every time we want to ask a 
-question about that particular subset of data!  Let's create a view: 
+하지만, 해당 데이터에 대한 질문을 받을 때마다 매번 질의문을 작성하고 싶지는 않다!
+뷰를 생성시켜 이런 문제를 해결해보자:
 
     CREATE VIEW summer_2000 AS
     SELECT *
     FROM surveys
     WHERE year = 2000 AND (month > 4 AND month < 10)
 
-You can also add a view using *Create View* in the *View* menu and see the
-results in the *Views* tab just like a table
+*View* 메뮤에서 *Create View*를 사용해서 뷰를 추가하고 나서
+테이블과 마찬가지로 *Views* 탭에서 결과를 확인할 수 있다.
 
-Now, we will be able to access these results with a much shorter notation:
+이제, 훨씬 더 간단한 표기법으로 결과에 접근할 수 있게 된다:
 
     SELECT *
     FROM summer_2000;
 
-> ### Challenge
+> ### 도전과제
 >
-> Write a query that returns the number of each species
-caught in each year sorted from most often caught species to the least
-occurring ones within each year starting from the most recent records. Save
-this query as a `VIEW`.
+> 매년 잡힌 각 종별 개체수를 반환하는 질의문을 작성한다.
+> 단, 가장 최근 레코드부터 시작되도록 내림차순으로 작성하는데,
+> 각 연도별로 가장 많은 종부터 가장 작은 종순으로 정렬되게 만든다.
+> 질의문 결과를 `VIEW`로 저장한다.
 
-## Null values
+## Null 값
 
 Using the view we created in the previous section (`summer_2000`), let's 
 talk about null values.  Missing values in SQL are identified with the 
