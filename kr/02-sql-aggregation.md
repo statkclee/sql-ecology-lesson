@@ -187,41 +187,34 @@ SUM에는 `weight` 필드에 값을 갖는 레코드 4개만 포함시켜 계산
     FROM summer_2000
     WHERE species_id == 'PE'
 
+`weight` 필드를 개별적으로 갯수를 세게되면, 필드에 결측값을 갖는 레코드는 무시하고 넘어간다.
+이것이 까다로운 `NULL`이 갖는 의미를 보여주고 있다 - COUNT(*) 와 COUNT(필드명)이 다른 값을 반환한다.
 
+또다른 사례는 부정(negative) 질의문을 작성할 때다 - 암컷이 아닌 동물 모두를 세어보자:
 
-When I count the weight field specifically, it ignores the records 
-with data missing in that field.  So 
-here is one example where NULLs can be tricky - COUNT(*) and 
-COUNT(field) can return different values.  
+    SELECT COUNT(*) 
+    FROM summer_2000
+    WHERE sex != 'F'
 
-Another case is when 
-we use a "negative" query - let's count all the non-female animals: 
+이제 수컷이 아닌 동물을 다른 방식으로 세어보자:
 
-   SELECT COUNT(*) 
-   FROM summer_2000
-   WHERE sex != 'F'
+    SELECT COUNT(*) 
+    FROM summer_2000
+    WHERE sex != 'M'
 
-Now let's count all the non-male animals: 
+하지만, 총계로 두 값을 비교하면 다음과 같다:
 
-   SELECT COUNT(*) 
-   FROM summer_2000
-   WHERE sex != 'M'
+    SELECT COUNT(*) 
+    FROM summer_2000
 
-But if we compare those two numbers with the total: 
+더하면 총합과 맞지 않는 것이 확인된다.
+부정문에 `NULL`값이 SQL에서 자동으로 포함되지 않기 때문이다.
+그래서 "not x" 질의문을 던지면, SQL은 데이터를 세가지 범주로 나눈다: 'x', 'not NULL, not x', NULL, 
+그리고 나서, 'not NULL', 'not x' 집단을 반환한다.
+흔히 이런 산출결과가 원하는 바이기도 하지만, 결측값도 포함되기를 원하기도 한다! 이런 경우에 질의문을 다음과 같이 변경한다:
 
-   SELECT COUNT(*) 
-   FROM summer_2000
+    SELECT COUNT(*)
+    FROM summer_2000
+    WHERE sex != 'M' OR sex IS NULL
 
-We'll see that they don't add up to the total!  That's because SQL 
-doesn't automatically include NULL values in a negative conditional 
-statement.  So if we are quering "not x", then SQL divides our data 
-into three categories: 'x', 'not NULL, not x' and NULL and 
-returns the 'not NULL, not x' group. Sometimes this may be what we want - 
-but sometimes we may want the missing values included as well!  In that 
-case, we'd need to change our query to: 
-
-  SELECT COUNT(*)
-  FROM summer_2000
-  WHERE sex != 'M' OR sex IS NULL
-
-Previous: [SQL Basic Queries](01-sql-basic-queries.html) Next: [Joins and aliases.](03-sql-joins-aliases.html)
+이전: [질의문(쿼리) 기초](../kr/01-sql-basic-queries.html) 다음: [결합(Join)과 별칭](../kr/03-sql-joins-aliases.html)
