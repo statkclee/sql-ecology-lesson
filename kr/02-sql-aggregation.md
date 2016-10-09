@@ -140,57 +140,54 @@ SQL에는 이런 작업을 수행하는 매우 강력한 매커니즘이 제공�
 
 ## Null 값
 
-Using the view we created in the previous section (`summer_2000`), let's 
-talk about null values.  Missing values in SQL are identified with the 
-special NULL value.  Scroll through our `summer_2000` view.  It should be 
-easy to find several records with missing values.  How do you think we 
-could filter to find these rows?  
+앞절(`summer_2000`)에서 생성한 뷰를 사용해서 `null` 값에 대해 알아보자.
+SQL에서 결측값은 특수값 `NULL` 로 식별된다.
+`summer_2000` 뷰를 스크롤해서 살펴보자.
+결측값이 포함된 레코드를 심심찮게 볼 수 있다.
+결측값이 포함된 행을 어떻게 필터링할 수 있는지 생각해 보자.
 
-To find all records where the species_id 
-is missing, we can use: 
+`species_id` 필드에 결측값이 포함된 모든 레코드를 찾아내려면, 질의문을 다음과 같이 작성할 수 있다:
 
     SELECT *
     FROM summer_2000
     WHERE species_id IS NULL
 
-If we wanted to use all the records where `species_id` is NOT null, we 
-would add the `NOT` keyword to our query.  
+`species_id` 필드에 결측값이 포함되지 않은 모든 레코드를 뽑아내려면,
+작성한 질의문에 `NOT` 예약어를 추가한다.
 
     SELECT *
     FROM summer_2000
     WHERE species_id IS NOT NULL
 
-There are many hidden "gotchas" with NULL values.  If we restrict our 
-query to the "PE" species, this will be easier to see: 
+"PE" 종으로 질의문을 한정시키면, 훨씬 파악하기 쉽다:
 
     SELECT *
     FROM summer_2000
     WHERE species_id == 'PE'
 
-There should only be six records.  If you look at the weight column, it's 
-easy to see what the average weight would be.  If we use SQL to find the 
-average weight, SQL behaves like we would hope, ignoring
-the NULL values:
+레코드가 6개만 존재한다. `weight` 칼럼을 살펴보고, 평균 체중이 얼마나 나가는지 알아보는 것은 쉽다.
+SQL을 사용해서 평균체중을 계산하려면, `NULL` 값을 무시하고 SQL이 자동으로 다음과 같이 질의문을 동작시키기를 희망한다: 
 
     SELECT AVG(weight)
     FROM summer_2000
     WHERE species_id == 'PE'
 
-But if we try to be extra clever, and find the average ourselves, 
-we might get tripped up: 
+하지만, 좀더 똑똑하게 평균을 구하게 되면 실수를 범하게 된다:
 
-   SELECT SUM(weight), COUNT(*), SUM(weight)/COUNT(*)
-   FROM summer_2000
-   WHERE species_id == 'PE'
+    SELECT SUM(weight), COUNT(*), SUM(weight)/COUNT(*)
+    FROM summer_2000
+    WHERE species_id == 'PE'
 
-Here the COUNT command includes all six records (even those with null 
-values), but the SUM only includes the 4 records with data in the 
-weight field, giving us an incorrect average.  However, 
-my strategy *will* work if I modify the count command slightly: 
+COUNT 명령어는 레코드 6개를 모두 포함(`null` 값을 갖는 것조차 포함)하지만, 
+SUM에는 `weight` 필드에 값을 갖는 레코드 4개만 포함시켜 계산을 수행해서 
+틀린 평균값이 산출된다.
+하지만, 합계를 산출하는 명령어를 약간만 변경시키면 동일한 전략이 *제대로* 동작되게 된다:
 
-   SELECT SUM(weight), COUNT(weight), SUM(weight)/COUNT(weight)
-   FROM summer_2000
-   WHERE species_id == 'PE'
+    SELECT SUM(weight), COUNT(weight), SUM(weight)/COUNT(weight)
+    FROM summer_2000
+    WHERE species_id == 'PE'
+
+
 
 When I count the weight field specifically, it ignores the records 
 with data missing in that field.  So 
