@@ -1,35 +1,31 @@
 ---
 layout: lesson
 root: ../
-title: Joins and aliases
+title: 병합(Join)과 별칭
 minutes: 30
 ---
 
-## Joins
+## 병합(Join)
 
-To combine data from two tables we use the SQL `JOIN` command, which comes after
-the `FROM` command.
+테이블 두개를 결합하는데 SQL 예약어 `JOIN` 명령어를 사용하는데 `FROM` 명령어 다음에 위치한다.
 
-The `JOIN` command on its own will result in a cross product, where each row in
-first table is paired with each row in the second table. Usually this is not
-what is desired when combining two tables with data that is related in some way.
+`JOIN` 명령어 자체로 외적값이 도출된다. 첫번째 테이블 각 행이 두번째 테이블 각 행과 짝지어 진다.
+어떤 방식으로든지 연관된 데이터를 갖고 있는 두 테이블을 조합할 때 일반적으로 이런 방식은 원하는 바가 아니다.
 
-For that, we need to tell the computer which columns provide the link between the two
-tables using the word `ON`.  What we want is to join the data with the same
-species codes.
+이를 위해서, 컴퓨터에게 두 테이블 사이 연결링크를 제공하는 단어 `ON`을 사용하여 의도를 전달한다.
+원하는 바는 동일한 종족코드를 갖는 데이터만 병합시키는 것이다.
 
     SELECT *
     FROM surveys
     JOIN species
     ON surveys.species_id = species.species_id;
 
-`ON` is like `WHERE`, it filters things out according to a test condition.  We use
-the `table.colname` format to tell the manager what column in which table we are
-referring to.
+`ON`은 `WHERE` 같은데, 검증조건에 따라 행을 필터링한다.
+`table.colname` 형태를 사용해서 어느 테이블이 어느 칼럼을 참조하고 있는지 데이터베이스 관리자에게 
+의도를 정확하게 전달한다.
 
-The output of the `JOIN` command will have columns from first table plus the
-columns from the second table. For the above command, the output will be a table
-that has the following column names:
+`JOIN`  명령어 출력결과는 첫번째 테이블에서 나온 칼럼과 두번째 테이블에서 나온 칼럼이 모두 포함된다.
+상기 질의문을 실행되면, 출력결과는 다음 칼럼명이 부여된 테이블이 만들어지게 된다.
 
 | record_id | month | day | year | plot_id | species_id | sex | hindfoot_length | weight | species_id | genus | species | taxa |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -37,16 +33,16 @@ that has the following column names:
 | 96  | 8  | 20  | 1997  | 12  | **DM**  |  M |  36  |  41  | **DM** | Dipodomys  | merriami  | Rodent  |
 | ... |||||||||||||| 
 
-Alternatively, we can use the word `USING`, as a short-hand.  In this case we are
-telling the manager that we want to combine `surveys` with `species` and that
-the common column is `species_id`.
+다른 방식으로, 축약해서 `USING` 키워드를 사용할 수도 있다.
+이런 경우에, 데이터베이스 관리자에게 `surveys` 테이블과 `species` 테이블을 결합하는데 두 테이블에 모두 공통으로 존재하는
+`species_id` 칼럼을 사용한다고 전달하게 된다.
 
     SELECT *
     FROM surveys
     JOIN species
     USING (species_id);
 
-The output will only have one **species_id** column
+출력결과는 **species_id** 칼럼 하나만 갖게 된다.
 
 | record_id | month | day | year | plot_id | species_id | sex | hindfoot_length | weight  | genus | species | taxa |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -54,12 +50,9 @@ The output will only have one **species_id** column
 | 96  | 8  | 20  | 1997  | 12  | DM  |  M |  36  |  41  | Dipodomys  | merriami  | Rodent  |
 | ... |||||||||||||
 
-We often won't want all of the fields from both tables, so anywhere we would
-have used a field name in a non-join query, we can use `table.colname`.
+흔히, 테이블 모두에서 필드 모두가 필요하지는 않다. `non-join` 질의문의 필드명을 `table.colname` 방식으로 사용한다.
 
-For example, what if we wanted information on when individuals of each
-species were captured, but instead of their species ID we wanted their
-actual species names.
+예를 들어, 각종이 포획된 연도정보가 필요하지만 `species_id` 대신에 실제 종명만 필요한 경우 질의문을 다음과 같이 작성한다.
 
     SELECT surveys.year, surveys.month, surveys.day, species.genus, species.species
     FROM surveys
@@ -73,14 +66,12 @@ actual species names.
 | 1977 | 7 | 16 | Dipodomys | merriami|
 |...||||||
 
-> ### Challenge:
+> ### 도전과제:
 >
-> Write a query that returns the genus, the species, and the weight
-> of every individual captured at the site
+> `site`에서 포획된 모든 개체에 대한 `genus`, `species`, `weight` 필드를 반환하는 질의문을 작성한다.
 
-Joins can be combined with sorting, filtering, and aggregation.  So, if we
-wanted average mass of the individuals on each different type of treatment, we
-could do something like
+병합(Join)을 정렬, 필터링, 집계와 결합해서 사용할 수 있다. 
+서로 다른 처리 유형별로 개체 평균 중량을 구하고자 한다면, 질의문을 다음과 같이 작성한다.
 
     SELECT plots.plot_type, AVG(surveys.weight)
     FROM surveys
@@ -88,16 +79,18 @@ could do something like
     ON surveys.plot_id = plots.plot_id
     GROUP BY plots.plot_type;
 
-> ### Challenge:
+> ### 도전과제:
 >
-> Write a query that returns the number of genus of the animals caught in each plot in descending order.
+> 내림차순으로 각 구획지에서 생포된 동물에 대한 `genus` 숫자를 뽑아내는 질의문을 작성한다.
 
-> ### Challenge:
+> ### 도전과제:
 >
-> Write a query that finds the average weight of each rodent species (i.e., only include species with Rodent in the taxa field).
+> 각 설치류 종별로 평균 체중을 계산하는 질의문을 작성한다 (즉, `taxa` 필드에 `Rodent` 값을 갖는 종을 포함시킨다)
 
 
-## Functions
+## 함수
+
+
 
 SQL includes numerous functions for manipulating data. You've already seen some
 of these being used for aggregation (`SUM` and `COUNT`) but there are functions

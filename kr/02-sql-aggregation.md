@@ -217,4 +217,4 @@ SUM에는 `weight` 필드에 값을 갖는 레코드 4개만 포함시켜 계산
     FROM summer_2000
     WHERE sex != 'M' OR sex IS NULL
 
-이전: [질의문(쿼리) 기초](../kr/01-sql-basic-queries.html) 다음: [결합(Join)과 별칭](../kr/03-sql-joins-aliases.html)
+이전: [질의문(쿼리) 기초](../kr/01-sql-basic-queries.html) 다음: [병합(Join)과 별칭](../kr/03-sql-joins-aliases.html)

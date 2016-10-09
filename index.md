@@ -48,7 +48,7 @@ status: Teaching
 | 1. [Lesson 00 Introduction to SQL](00-sql-introduction.html) | 1. [00. SQL 소개](kr/00-sql-introduction.html)|
 | 2. [Lesson 01 Basic queries](01-sql-basic-queries.html)      | 2. [01. 질의문(쿼리) 기초](kr/01-sql-basic-queries.html)|
 | 3. [Lesson 02 Aggregation](02-sql-aggregation.html)          | 3. [02. 집계](kr/02-sql-aggregation.html)|
-| 4. [Lesson 03 Joins and aliases](03-sql-joins-aliases.html)  | 4. [03. 결합(Join)과 별칭](kr/03-sql-joins-aliases.html)|
+| 4. [Lesson 03 Joins and aliases](03-sql-joins-aliases.html)  | 4. [03. 병합(Join)과 별칭](kr/03-sql-joins-aliases.html)|
 
 ## 데이터
 
