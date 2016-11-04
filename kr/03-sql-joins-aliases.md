@@ -90,61 +90,57 @@ minutes: 30
 
 ## 함수
 
+SQL에는 데이터를 조작하는데 사용되는 함수가 많다. 
+집계(`SUM`, `COUNT`)에 사용된 함수를 이미 살펴봤지만, 
+각 개별값에도 적용할 수 있는 함수도 있다.
+아마도, 가장 중요한 것은 `IFNULL`, `NULLIF`일 것이다.
+`IFNULL` 함수는 `NULL` 자리에 대신할 값을 지정할 수 있게 해준다.
 
-
-SQL includes numerous functions for manipulating data. You've already seen some
-of these being used for aggregation (`SUM` and `COUNT`) but there are functions
-that operate on individual values as well. Probably the most important of these
-are `IFNULL` and `NULLIF`. `IFNULL` allows us to specify a value to use in
-place of `NULL`.
-
-We can represent unknown sexes with "U" instead of `NULL`:
+성별을 확인되지 않는 `NULL` 값 대신에 "U"로 대신 표현한다:
 
     SELECT species_id, sex, IFNULL(sex, 'U') AS non_null_sex
     FROM surveys;
 
-The lone "sex" column is only included in the query above to illustrate where
-`IFNULL` has changed values; this isn't a usage requirement.
+"sex" 칼럼은 단지 `IFNULL`을 통해 값이 변경되었는지 확인하는 용도로 포함되었다;
+실제로 이렇게 사용하는 경우는 없다.
 
-> ### Challenge:
+> ### 도전과제:
 >
-> Write a query that returns 30 instead of `NULL` for values in the
-> `hindfoot_length` column.
+> `hindfoot_length`  칼럼에 `NULL` 값 대신에 30을 반환하는 질의문을 작성한다.
 
-> ### Challenge:
+> ### 도전과제:
 >
-> Write a query that calculates the average hind-foot length of each species,
-> assuming that unknown lengths are 30 (as above).
+> 확인되지 않는 길이는 (위와 같이) 30 으로 가정하고, 각 종별로 후족부(hind-foot) 평균길이를 
+> 계산하는 질의문을 작성한다.
 
-`IFNULL` can be particularly useful in `JOIN`. When joining the `species` and
-`surveys` tables earlier, some results were excluded because the `species_id`
-was `NULL`. We can use `IFNULL` to include them again, re-writing the `NULL` to
-a valid joining value:
+`JOIN`에서 `IFNULL` 함수를 특히 유용하게 사용할 수 있다.
+`species` , `surveys`  테이블을 앞에서 병합할 때,
+일부 결과값이 제외되었는데 이유는 `species_id`가 `NULL`인 경우가 있기 때문이다.
+`IFNULL` 함수를 사용해서, 적법한 병합값으로 `NULL` 값을 다시 작성해서, 누락된 값을 다시 포함시킨다:
 
     SELECT surveys.year, surveys.month, surveys.day, species.genus, species.species
     FROM surveys
     JOIN species
     ON surveys.species_id = IFNULL(species.species_id, 'AB');
 
-> ### Challenge:
+> ### 도전과제:
 >
-> Write a query that returns the number of genus of the animals caught in each
-> plot, using `IFNULL` to assume that unknown species are all of the genus
-> "Rodent".
+> 각 포획지에서 사로잡힌 동물종수를 반환하는 질의문을 작성한다.
+> `IFNULL` 함수를 사용해서, 미확인된 종은 모두 설치류 "Rodent"로 가정하고 치환시킨다.
 
-The inverse of `IFNULL` is `NULLIF`. This returns `NULL` if the first argument
-is equal to the second argument. If the two are not equal, the first argument
-is returned. This is useful for "nulling out" specific values.
+`IFNULL` 함수의 역함수는 `NULLIF`다. 첫번째 인자와 두번째 인자가 동일한 경우 
+`NULL` 값을 반환한다. 두 인자가 동일하지 않는 경우, 첫번째 인자가 반환된다.
+특정 값을 `NULL`값화하는데 유용하게 사용된다.
 
-We can "null out" plot 7:
+다음 질의문으로 7번 포획지를 `NULL` 값화한다:
+
 
     SELECT species_id, plot_id, NULLIF(plot_id, 7) AS partial_plot_id
     FROM surveys;
 
-Some more functions which are common to SQL databases are listed in the table
-below:
+SQL 데이터베이스마다 공통적으로 사용될 수 있는 함수가 다음 표에 나열되어 있다:
 
-| Function                     | Description                                                                                     |
+|  함수명                      | 부연 설명                                                                                       |
 |------------------------------|-------------------------------------------------------------------------------------------------|
 | `ABS(n)`                     | Returns the absolute (positive) value of the numeric expression *n*                             |
 | `LENGTH(s)`                  | Returns the length of the string expression *s*                                                 |
@@ -154,86 +150,88 @@ below:
 | `TRIM(s)`                    | Returns the string expression *s* without leading and trailing whitespace characters            |
 | `UPPER(s)`                   | Returns the string expression *s* converted to uppercase                                        |
 
-Finally, some useful functions which are particular to SQLite are listed in the
-table below:
+마지막으로, SQLite에서만 사용되는 함수는 다음 표에 나열되어 있다:
 
-| Function                            | Description                                                                                                                                                                    |
-|-------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `IFNULL(x, y)`                      | Returns *x* if it is non-NULL, otherwise returns *y*                                                                                                                           |
-| `RANDOM()`                          | Returns a random integer between -9223372036854775808 and +9223372036854775807.                                                                                                |
-| `REPLACE(s, f, r)`                  | Returns the string expression *s* in which every occurrence of *f* has been replaced with *r*                                                                                  |
+| Function                            | Description                                                                                                                |
+|-------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
+| `IFNULL(x, y)`                      | Returns *x* if it is non-NULL, otherwise returns *y*                                                                       |
+| `RANDOM()`                          | Returns a random integer between -9223372036854775808 and +9223372036854775807.                                            |
+| `REPLACE(s, f, r)`                  | Returns the string expression *s* in which every occurrence of *f* has been replaced with *r*                              |
 | `SUBSTR(s, x, y)` or `SUBSTR(s, x)` | Returns the portion of the string expression *s* starting at the character position *x* (leftmost position is 1), *y* characters long (or to the end of *s* if *y* is omitted) |
 
-> ### Challenge:
+> ### 도전과제:
 >
-> Write a query that returns genus names, sorted from longest genus name down
-> to shortest.
+> 가장 긴 종명부터 가장짧은 종명으로 내림차순으로 정렬하여 종명(`genus`)을 뿌려주는 질의문을 작성한다.
 
-## Aliases
+## 별칭(Aliases)
 
-As queries get more complex names can get long and unwieldy. To help make things
-clearer we can use aliases to assign new names to things in the query.
+질의문이 복잡해짐에 따라, 명칭이 질어지고 이상해질 수 있다.
+이런 문제를 깔끔하게 처리하는데, 별칭(alias)를 사용해서 질의문의 테이블명과 칼럼명 등에 새로운 명칭을 부여한다.
 
-We can alias both table names:
+
+
+두 테이블에 별칭을 붙인다:
 
     SELECT surv.year, surv.month, surv.day, sp.genus, sp.species
     FROM surveys AS surv
     JOIN species AS sp
     ON surv.species_id = sp.species_id;
 
-And column names:
+칼럼명에도 별칭을 붙인다:
 
     SELECT surv.year AS yr, surv.month AS mo, surv.day AS day, sp.genus AS gen, sp.species AS sp
     FROM surveys AS surv
     JOIN species AS sp
     ON surv.species_id = sp.species_id;
 
-The `AS` isn't technically required, so you could do
+`AS`가 기술적으로 꼭 필요한 것은 아니라서, 다음과 같이 작성하는 것도 가능하다:
 
     SELECT surv.year yr
     FROM surveys surv;
 
-but using `AS` is much clearer so it is good style to include it.
+하지만, `AS` 키워드를 사용하는 것이 훨씬 더 깔끔해서, 포함시키는 것이 좋은 코딩 스타일로 권장된다.
 
-> ### Challenge (optional):
+> ### 도전과제 (선택):
 >
-> SQL queries help us *ask* specific *questions* which we want to answer about our data. The real skill with SQL is to know how to translate our scientific questions into a sensible SQL query (and subsequently visualize and interpret our results).
+> SQL 질의문을 사용해서 데이터를 통해 답을 얻을 수 있는 특정한 질문을 만들어 내는데 도움이 된다.
+> SQL 실전 기술은 과학적 질문을 의미있는 SQL 질의문으로 번역하는 방법을 알고 있느냐다.
+> 그리고, 이렇게 나온 결과를 시각화하고 결과를 해석한다.
+> 다음 질문을 살펴본다; 질문이 일반적인 평이한 문장으로 작성되어 있다.
+> SQL 질의문으로 번역해서 적합한 대답이 도출되었는가?
+> 
+> 1. 포획지가 유형별로 얼마나 있나?
+> 
+> 2. 연도별로, 성별로 얼마나 많은 표본시료가 있나?
+> 
+> 3. 각종별로 얼마나 많은 표본이 포획지마다 생포되었는가?
+> 
+> 4. 각 `taxa` 별로 평균 무게는 얼마나 될까?
+> 
+> 5. 각 `taxa`별로 각종별 퍼센티지는 얼마나 될까?
+> 
+> 6. "Rodent" 종별로 최소, 최대, 평균 무게는 얼마나 될까?
 >
-> Have a look at the following questions; these questions are written in plain English. Can you translate them to *SQL queries* and give a suitable answer?  
+> 7. 각 종별로 수컷과 앞컷 설치류(rodent) 후족부 평균 길이는 얼마나 될까? 수컷과 앞컷 사이 차이가 있나?
 > 
-> 1. How many plots from each type are there?  
-> 
-> 2. How many specimens are of each sex are there for each year?  
-> 
-> 3. How many specimens of each species were captured in each type of plot?  
-> 
-> 4. What is the average weight of each taxa?  
-> 
-> 5. What is the percentage of each species in each taxa?  
-> 
-> 6. What are the minimum, maximum and average weight for each species of Rodent?  
->
-> 7. What is the average hindfoot length for male and female rodent of each species? Is there a Male / Female difference?  
-> 
-> 8. What is the average weight of each rodent species over the course of the years? Is there any noticeable trend for any of the species?  
+> 8. 수년에 걸쳐 각 설치류별로 평균 무게는 얼마나 될까? 종별로 눈에 띄는 추세가 발견되었는가?
 
-> Proposed solutions:
+> 여러 해답중 하나:
 >
-> 1. Solution: `SELECT plot_type, count(*) AS num_plots  FROM plots  GROUP BY plot_type  ORDER BY num_plots DESC`
+> 1. 해답: `SELECT plot_type, count(*) AS num_plots  FROM plots  GROUP BY plot_type  ORDER BY num_plots DESC`
 >
-> 2. Solution: `SELECT year, sex, count(*) AS num_animal  FROM surveys  WHERE sex IS NOT null  GROUP BY sex, year`
+> 2. 해답: `SELECT year, sex, count(*) AS num_animal  FROM surveys  WHERE sex IS NOT null  GROUP BY sex, year`
 >
-> 3. Solution: `SELECT species_id, plot_type, count(*) FROM surveys JOIN plots ON surveys.plot_id=plots.plot_id WHERE species_id IS NOT null GROUP BY species_id, plot_type`
+> 3. 해답: `SELECT species_id, plot_type, count(*) FROM surveys JOIN plots ON surveys.plot_id=plots.plot_id WHERE species_id IS NOT null GROUP BY species_id, plot_type`
 >
-> 4. Solution: `SELECT taxa, AVG(weight) FROM surveys JOIN species ON species.species_id=surveys.species_id GROUP BY taxa`
+> 4. 해답: `SELECT taxa, AVG(weight) FROM surveys JOIN species ON species.species_id=surveys.species_id GROUP BY taxa`
 >
-> 5. Solution: `SELECT taxa, 100.0*count(*)/(SELECT count(*) FROM surveys) FROM surveys JOIN species ON surveys.species_id=species.species_id GROUP BY taxa`
+> 5. 해답: `SELECT taxa, 100.0*count(*)/(SELECT count(*) FROM surveys) FROM surveys JOIN species ON surveys.species_id=species.species_id GROUP BY taxa`
 >
-> 6. Solution: `SELECT surveys.species_id, MIN(weight) as min_weight, MAX(weight) as max_weight, AVG(weight) as mean_weight FROM surveys JOIN species ON surveys.species_id=species.species_id WHERE taxa = 'Rodent' GROUP BY surveys.species_id`
+> 6. 해답: `SELECT surveys.species_id, MIN(weight) as min_weight, MAX(weight) as max_weight, AVG(weight) as mean_weight FROM surveys JOIN species ON surveys.species_id=species.species_id WHERE taxa = 'Rodent' GROUP BY surveys.species_id`
 >
-> 7. Solution: `SELECT surveys.species_id, sex, AVG(hindfoot_length) as mean_foot_length  FROM surveys JOIN species ON surveys.species_id=species.species_id WHERE taxa = 'Rodent' AND sex IS NOT NULL GROUP BY surveys.species_id, sex`
+> 7. 해답: `SELECT surveys.species_id, sex, AVG(hindfoot_length) as mean_foot_length  FROM surveys JOIN species ON surveys.species_id=species.species_id WHERE taxa = 'Rodent' AND sex IS NOT NULL GROUP BY surveys.species_id, sex`
 >
-> 8. Solution: `SELECT surveys.species_id, year, AVG(weight) as mean_weight FROM surveys JOIN species ON surveys.species_id=species.species_id WHERE taxa = 'Rodent' GROUP BY surveys.species_id, year`
+> 8. 해답: `SELECT surveys.species_id, year, AVG(weight) as mean_weight FROM surveys JOIN species ON surveys.species_id=species.species_id WHERE taxa = 'Rodent' GROUP BY surveys.species_id, year`
 
 
-Previous: [SQL Aggregation](02-sql-aggregation.html)
+이전: [SQL 집계(Aggregation)](02-sql-aggregation.html)
